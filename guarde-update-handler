@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+# Import gi and set notify version
+import gi
+import os
+import platform
+import requests
+import threading
+gi.require_version('Notify', '0.7')
+from gi.repository import Notify as nt, GLib
+
+print("GuarDE Update Handler")
+print("2025 Dakota's Electronics Company")
+latest_version = 0
+update_type = 0
+
+def update_now(self, self2):
+    print("The system will be updated.")
+    useri = threading.Thread(target=ui)
+    useri.start()
+    os.system("pkexec /usr/local/lib/guarde-update/update.sh")
+
+def postpone(self, self2):
+    print("The system will NOT be updated.")
+    os._exit(0)
+
+def changelog(self, self2):
+    os.system(f"xdg-open https://github.com/DakotasElectronics/guarde24updates/releases/tag/alaska{latest_version}")
+    os._exit(0)
+    
+# Get current build number. Uses the "BUILD_NUMBER" key in /usr/lib/os-release which was added in GuarDE 24 MU1 build 257018
+def get_current_build(key):
+    try:
+        os_release_dict = platform.freedesktop_os_release()
+        return os_release_dict.get(key)
+    except OSError:
+        print("Something went wrong.")    
+
+# Get latest release
+def get_latest_release():
+    try:
+        response = requests.get("https://api.github.com/repos/dakotaselectronics/guarde24updates/releases/latest")
+        global latest_version
+        latest_version = response.json()["name"]
+        latest_version =  int(latest_version)
+    except Exception:
+        print("Unable to connect.")
+
+# Overlay updating screen over UI.
+def ui():
+     os.system('/usr/local/lib/guarde-update/ui/ui --no-sandbox')
+
+# Set build number variables
+build_number = get_current_build("BUILD_NUMBER")
+build_number = int(build_number)
+get_latest_release()
+
+# Compare build numbers to check if the current system needs to be updated.
+if build_number == latest_version:
+    print("All up to date.")
+    os._exit(0)
+
+elif latest_version == 0:
+    print("No internet. Unable to check for updates.")
+    os._exit(0)
+
+# If not, prompt user to update GuarDE.
+elif build_number < latest_version:
+    print("The system is out of date. Prompting user to update.")
+
+# Prepare update notification 
+nt.init("GuarDE Updates")
+update = nt.Notification.new (f"Updates are available for GuarDE",
+                             f"There is a newer version of GuarDE available. Would you like to download and install the update now or postpone? You are currently running version {build_number} and the latest version is {latest_version}.")
+
+update.set_urgency(2)
+update.add_action(
+    "update",
+    "Update now",
+    update_now
+)
+
+update.add_action(
+    "changelog",
+    "What's new",
+    changelog
+)
+
+update.add_action(
+    "postpone",
+    "Remind me later",
+    postpone
+)
+
+update.show()
+main_loop = GLib.MainLoop()
+main_loop.run()
