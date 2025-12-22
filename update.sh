@@ -9,7 +9,7 @@ mkdir /var/tmp/guarde
 sudo git clone --depth 1 https://github.com/dakotaselectronics/guarde24updates.git /var/tmp/guarde/
 
 # Install any upgrades from the ubuntu repositories before updating GuarDE packages.
-sudo apt upgrade -y
+DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y
 
 # Upgrade GuarDE packages.
 DEBIAN_FRONTEND=noninteractive sudo apt install /var/tmp/guarde/*.deb -y --allow-change-held-packages
