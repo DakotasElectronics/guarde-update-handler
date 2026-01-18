@@ -8,11 +8,12 @@ import threading
 gi.require_version('Notify', '0.7')
 from gi.repository import Notify as nt, GLib
 
-print("GuarDE Update Handler")
-print("2025 Dakota's Electronics Company")
+print("GuarDE Update Handler [Version 260120]")
+print("2026 Dakota's Electronics Company")
 latest_version = 0
 update_type = 0
 
+# I don't know if this is the best way to do things, but it works so whatever.
 def update_now(self, self2):
     print("The system will be updated.")
     useri = threading.Thread(target=ui)
@@ -24,10 +25,10 @@ def postpone(self, self2):
     os._exit(0)
 
 def changelog(self, self2):
-    os.system(f"xdg-open https://github.com/DakotasElectronics/guarde24updates/releases/tag/alaska{latest_version}")
+    os.system(f"xdg-open https://dakotaselectronics.github.io/guardeupdates/changelog/alaska/release/client/{latest_version}")
     os._exit(0)
     
-# Get current build number. Uses the "BUILD_NUMBER" key in /usr/lib/os-release which was added in GuarDE 24 MU1 build 257018
+# Get current build number. Uses the "BUILD_NUMBER" key in /usr/lib/os-release which was added in MU1 build (not sure yet)
 def get_current_build(key):
     try:
         os_release_dict = platform.freedesktop_os_release()
@@ -38,9 +39,9 @@ def get_current_build(key):
 # Get latest release
 def get_latest_release():
     try:
-        response = requests.get("https://api.github.com/repos/dakotaselectronics/guarde24updates/releases/latest")
+        response = requests.get("https://dakotaselectronics.github.io/guardeupdates/alaska/release/client/latest")
         global latest_version
-        latest_version = response.json()["name"]
+        latest_version = response.json()["build"]
         latest_version =  int(latest_version)
     except Exception:
         print("Unable to connect.")
